@@ -21,6 +21,9 @@ Search the StackExchange site corresponding to `[subject name]`
 - `english`
 - `math`
 
+#### `$help`
+Print a shortened version of this document
+
 ## StackExchange sites supported
 ### [StackOverflow](https://stackoverflow.com)
 Default site for non-subject channels and `cs` channel

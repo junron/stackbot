@@ -4,12 +4,38 @@ import com.jessecorbett.diskord.dsl.commands
 import com.jessecorbett.diskord.util.words
 import org.apache.commons.text.StringEscapeUtils
 
+val helpText = """
+          # Stackbot
+A Discord bot for searching Stack Exchange sites, written in Kotlin with [Diskord](https://github.com/JesseCorbett/Diskord).
+
+## Commands
+
+#### `${'$'}ping`
+Check if server is alive
+
+#### `${'$'}halp [query]`
+Search a StackExchange site.   
+The site searched depends on the current channel, and defaults to `stackoverflow`.  
+See [default sites](#stackExchange-sites-supported)
+
+#### `${'$'}[subject name] [query]`
+Search the StackExchange site corresponding to `[subject name]`
+
+**Valid subject names:**
+- `chem`
+- `phys`
+- `cs`
+- `english`
+- `math`""".trimIndent()
 
 suspend fun main() {
   val token = getResourceAsText("/token.txt")
   val channels = loadChannels()
   bot(token) {
     commands("$") {
+      command("help") {
+        reply(helpText)
+      }
       command("ping") {
         reply("pong")
       }
@@ -19,7 +45,7 @@ suspend fun main() {
         val queryWords = words.drop(1)
         val site = channel?.site ?: "stackoverflow"
         val query = queryWords.joinToString(" ")
-        reply("",StackOverflow.discordSearch(query,site))
+        reply("", StackOverflow.discordSearch(query, site))
       }
 
       for (channel in channels) {
@@ -27,7 +53,7 @@ suspend fun main() {
           val queryWords = words.drop(1)
           val site = channel.site
           val query = queryWords.joinToString(" ")
-          reply("",StackOverflow.discordSearch(query,site))
+          reply("", StackOverflow.discordSearch(query, site))
         }
       }
     }
