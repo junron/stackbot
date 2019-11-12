@@ -23,6 +23,7 @@ class StackOverflow {
     }
 
     fun discordSearch(query: String, site: String): Embed {
+      println(query)
       val response = Gson().fromJson(search(query, site), StackResponse::class.java)
       if (response.items.isEmpty()) {
         return embed {
