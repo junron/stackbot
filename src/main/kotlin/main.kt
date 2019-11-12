@@ -5,20 +5,19 @@ import com.jessecorbett.diskord.util.words
 import org.apache.commons.text.StringEscapeUtils
 
 val helpText = """
-          # Stackbot
-A Discord bot for searching Stack Exchange sites, written in Kotlin with [Diskord](https://github.com/JesseCorbett/Diskord).
+           Stackbot
+A Discord bot for searching Stack Exchange sites
 
-## Commands
+Commands
 
-#### `${'$'}ping`
+`${'$'}ping`
 Check if server is alive
 
-#### `${'$'}halp [query]`
+`${'$'}halp [query]`
 Search a StackExchange site.   
-The site searched depends on the current channel, and defaults to `stackoverflow`.  
-See [default sites](#stackExchange-sites-supported)
+The site searched depends on the current channel, and defaults to `stackoverflow`.
 
-#### `${'$'}[subject name] [query]`
+`${'$'}[subject name] [query]`
 Search the StackExchange site corresponding to `[subject name]`
 
 **Valid subject names:**
