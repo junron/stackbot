@@ -3,6 +3,7 @@ import com.jessecorbett.diskord.dsl.command
 import com.jessecorbett.diskord.dsl.commands
 import com.jessecorbett.diskord.util.words
 import org.apache.commons.text.StringEscapeUtils
+import java.io.File
 
 val helpText = """
            Stackbot
@@ -28,7 +29,7 @@ Search the StackExchange site corresponding to `[subject name]`
 - `math`""".trimIndent()
 
 suspend fun main() {
-  val token = getResourceAsText("/token.txt")
+  val token = File("secrets/token.txt").readText()
   val channels = loadChannels()
   bot(token) {
     commands("$") {
@@ -57,10 +58,6 @@ suspend fun main() {
       }
     }
   }
-}
-
-fun getResourceAsText(path: String): String {
-  return object {}.javaClass.getResource(path).readText()
 }
 
 fun String.unescapeHtml() = StringEscapeUtils.UNESCAPE_HTML4.translate(this)!!
