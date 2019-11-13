@@ -29,7 +29,7 @@ Search the StackExchange site corresponding to `[subject name]`
 - `math`""".trimIndent()
 
 suspend fun main() {
-  val token = File("secrets/token.txt").readText()
+  val token = File("secrets/token.txt").readText().trim()
   val channels = loadChannels()
   bot(token) {
     commands("$") {
