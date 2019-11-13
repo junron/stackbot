@@ -26,7 +26,7 @@ class StackOverflow {
       println(query)
       if (query.isBlank()) {
         return embed {
-          title = "No results for $query"
+          title = "No results: empty query"
           color = Colors.RED
         }
       }
