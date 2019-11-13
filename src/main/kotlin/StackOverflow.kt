@@ -24,6 +24,12 @@ class StackOverflow {
 
     fun discordSearch(query: String, site: String): Embed {
       println(query)
+      if (query.isBlank()) {
+        return embed {
+          title = "No results for $query"
+          color = Colors.RED
+        }
+      }
       val response = Gson().fromJson(search(query, site), StackResponse::class.java)
       if (response.items.isEmpty()) {
         return embed {
@@ -36,7 +42,7 @@ class StackOverflow {
           "\n\n**Answer:**\n" +
           item.answers[0].body_markdown).unescapeHtml().parseAsCode()
 //    Truncate response if too long
-      if (description.length > 2048){
+      if (description.length > 2048) {
         description = description.substring(0, 2045) + "..."
         if (hasUnmatchedBackticks(description)) description = description.substring(0, 2042) + "```..."
       }
