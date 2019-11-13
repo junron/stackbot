@@ -30,7 +30,7 @@ class StackOverflow {
           color = Colors.RED
         }
       }
-      val response = Gson().fromJson(search(query, site), StackResponse::class.java)
+      val response = Gson().fromJson(search(query.parseTags(), site), StackResponse::class.java)
       if (response.items.isEmpty()) {
         return embed {
           title = "No results for $query"
@@ -53,6 +53,12 @@ class StackOverflow {
         color = Colors.GREEN
       }
     }
+  }
+}
+
+fun String.parseTags(): String {
+  return this.replace(Regex("\\[.+]")) {
+    it.value.replace(" ", "-")
   }
 }
 
