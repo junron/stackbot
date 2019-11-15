@@ -16,6 +16,7 @@ jobs:
       - name: Build shadowJar
         run: |
           chmod +x ./gradlew
+          ./gradlew clean
           ./gradlew shadowJar
       - name: Upload artifacts
         uses: jakejarvis/s3-sync-action@master
