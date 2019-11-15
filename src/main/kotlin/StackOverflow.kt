@@ -22,18 +22,19 @@ class StackOverflow {
       ).responseString().component3().component1()!!
     }
 
-    fun discordSearch(query: String, site: String): Embed {
+    fun discordSearch(query: Query): Embed {
       println(query)
-      if (query.isBlank()) {
+      val (queryString, site) = query
+      if (queryString.isBlank()) {
         return embed {
           title = "No results: empty query"
           color = Colors.RED
         }
       }
-      val response = Gson().fromJson(search(query.parseTags(), site), StackResponse::class.java)
+      val response = Gson().fromJson(search(queryString.parseTags(), site), StackResponse::class.java)
       if (response.items.isEmpty()) {
         return embed {
-          title = "No results for $query"
+          title = "No results for $queryString"
           color = Colors.RED
         }
       }
@@ -46,12 +47,15 @@ class StackOverflow {
         description = description.substring(0, 2045) + "..."
         if (hasUnmatchedBackticks(description)) description = description.substring(0, 2042) + "```..."
       }
-      return embed {
+      val result = embed {
         this.description = description
         title = item.title.unescapeHtml()
         url = item.link
         color = Colors.GREEN
       }
+      query.increment()
+      query.cache.add(result)
+      return result
     }
   }
 }
@@ -101,3 +105,12 @@ fun hasUnmatchedBackticks(text: String) = text.split("```").size % 2 == 0
 data class StackAnswers(val body_markdown: String)
 data class StackData(val answers: List<StackAnswers>, val body_markdown: String, val title: String, val link: String)
 data class StackResponse(val items: List<StackData>)
+data class Query(val query: String, val site: String) {
+  var answerNumber = 0
+    private set
+  val cache = mutableListOf<Embed>()
+
+  fun increment() {
+    answerNumber++
+  }
+}

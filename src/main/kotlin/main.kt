@@ -1,3 +1,4 @@
+import com.jessecorbett.diskord.api.model.stringified
 import com.jessecorbett.diskord.dsl.bot
 import com.jessecorbett.diskord.dsl.command
 import com.jessecorbett.diskord.dsl.commands
@@ -30,8 +31,22 @@ Search the StackExchange site corresponding to `[subject name]`
 
 suspend fun main() {
   val token = File("secrets/token.txt").readText().trim()
+  val messages = mutableMapOf<Long, Query>()
   val channels = loadChannels()
   bot(token) {
+    reactionAdded {
+      //      Return if message is not sent by bot
+      val query = messages[it.messageId.toLong()] ?: return@reactionAdded
+      val message = clientStore.channels[it.channelId].getMessage(it.messageId)
+      val reaction = message.reactions.firstOrNull { reaction -> reaction.emoji == it.emoji } ?: return@reactionAdded
+      if (reaction.count == 1) return@reactionAdded
+      when (reaction.emoji.stringified) {
+        EmojiMappings.trash -> {
+          message.delete()
+        }
+        else -> println(reaction.emoji.stringified)
+      }
+    }
     commands("$") {
       command("help") {
         reply(helpText)
@@ -40,20 +55,23 @@ suspend fun main() {
         reply("pong")
       }
 
-      command("halp") {
-        val channel = channels.firstOrNull { it.id == this.channelId.toLong() }
-        val queryWords = words.drop(1)
-        val site = channel?.site ?: "stackoverflow"
-        val query = queryWords.joinToString(" ")
-        reply("", StackOverflow.discordSearch(query, site))
-      }
-
       for (channel in channels) {
         command(channel.name) {
+          var site = channel.site
+          if (channel.id == 0L) {
+            val realChannel = channels.firstOrNull { it.id == this.channelId.toLong() }
+            site = realChannel?.site ?: "stackoverflow"
+          }
           val queryWords = words.drop(1)
-          val site = channel.site
-          val query = queryWords.joinToString(" ")
-          reply("", StackOverflow.discordSearch(query, site))
+          val queryString = queryWords.joinToString(" ")
+          val query = Query(queryString, site)
+          val message = reply("", StackOverflow.discordSearch(query))
+          if (query.answerNumber == 0) return@command
+          messages[message.id.toLong()] = query
+//        Trash basket
+          message.react(EmojiMappings.trash)
+//        Right arrow
+          message.react(EmojiMappings.arrowRight)
         }
       }
     }
