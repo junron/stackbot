@@ -4,7 +4,6 @@ import com.jessecorbett.diskord.dsl.bot
 import com.jessecorbett.diskord.dsl.command
 import com.jessecorbett.diskord.dsl.commands
 import com.jessecorbett.diskord.util.words
-import org.apache.commons.text.StringEscapeUtils
 import java.io.File
 
 val helpText = """
@@ -97,5 +96,3 @@ suspend fun main() {
     }
   }
 }
-
-fun String.unescapeHtml() = StringEscapeUtils.UNESCAPE_HTML4.translate(this)!!

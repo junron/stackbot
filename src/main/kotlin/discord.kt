@@ -13,7 +13,7 @@ fun loadChannels(): List<DiscordChannel> {
 }
 
 object EmojiMappings {
-  const val trash = "\uD83D\uDDD1️"
-  const val arrowRight = "➡️"
-  const val arrowLeft = "⬅️"
+  const val trash = "\uD83D\uDDD1"
+  const val arrowRight = "▶"
+  const val arrowLeft = "◀"
 }
