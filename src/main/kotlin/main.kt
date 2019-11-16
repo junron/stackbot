@@ -1,4 +1,5 @@
 import com.jessecorbett.diskord.api.model.stringified
+import com.jessecorbett.diskord.api.rest.MessageEdit
 import com.jessecorbett.diskord.dsl.bot
 import com.jessecorbett.diskord.dsl.command
 import com.jessecorbett.diskord.dsl.commands
@@ -7,7 +8,6 @@ import org.apache.commons.text.StringEscapeUtils
 import java.io.File
 
 val helpText = """
-           Stackbot
 A Discord bot for searching Stack Exchange sites
 
 Commands
@@ -44,8 +44,28 @@ suspend fun main() {
         EmojiMappings.trash -> {
           message.delete()
         }
-        else -> println(reaction.emoji.stringified)
+        EmojiMappings.arrowRight -> {
+          if (query.increment()) {
+            clientStore.channels[it.channelId].editMessage(
+              it.messageId, MessageEdit(
+                "",
+                embed = query.cache[query.answerNumber]
+              )
+            )
+          }
+        }
+        EmojiMappings.arrowLeft -> {
+          if (query.decrement()) {
+            clientStore.channels[it.channelId].editMessage(
+              it.messageId, MessageEdit(
+                "",
+                embed = query.cache[query.answerNumber]
+              )
+            )
+          }
+        }
       }
+
     }
     commands("$") {
       command("help") {
@@ -57,6 +77,7 @@ suspend fun main() {
 
       for (channel in channels) {
         command(channel.name) {
+          println("author: ${author.username}")
           var site = channel.site
           if (channel.id == 0L) {
             val realChannel = channels.firstOrNull { it.id == this.channelId.toLong() }
@@ -66,11 +87,10 @@ suspend fun main() {
           val queryString = queryWords.joinToString(" ")
           val query = Query(queryString, site)
           val message = reply("", StackOverflow.discordSearch(query))
-          if (query.answerNumber == 0) return@command
+          if (query.answerNumber == -1) return@command
           messages[message.id.toLong()] = query
-//        Trash basket
+          message.react(EmojiMappings.arrowLeft)
           message.react(EmojiMappings.trash)
-//        Right arrow
           message.react(EmojiMappings.arrowRight)
         }
       }

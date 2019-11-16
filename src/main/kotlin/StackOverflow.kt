@@ -2,6 +2,7 @@ import com.github.kittinunf.fuel.httpGet
 import com.google.gson.Gson
 import com.jessecorbett.diskord.api.rest.Embed
 import com.jessecorbett.diskord.dsl.embed
+import com.jessecorbett.diskord.dsl.footer
 import com.jessecorbett.diskord.util.Colors
 
 class StackOverflow {
@@ -17,7 +18,7 @@ class StackOverflow {
 //        Only include answers
           "filter" to "!*1SgQGDMkNpCIzzMCq25IRX4u0u-1D8S2YxUITK_Q",
           "answers" to 1,
-          "pagesize" to 1
+          "pagesize" to 5
         )
       ).responseString().component3().component1()!!
     }
@@ -31,31 +32,34 @@ class StackOverflow {
           color = Colors.RED
         }
       }
-      val response = Gson().fromJson(search(queryString.parseTags(), site), StackResponse::class.java)
+      val response =
+        Gson().fromJson(search(queryString.parseTags(), site), StackResponse::class.java)
       if (response.items.isEmpty()) {
         return embed {
           title = "No results for $queryString"
           color = Colors.RED
         }
       }
-      val item = response.items[0]
-      var description = (item.body_markdown +
-          "\n\n**Answer:**\n" +
-          item.answers[0].body_markdown).unescapeHtml().parseAsCode()
+      val embeds: List<Embed> = response.items.mapIndexed { index, item ->
+        var description = (item.body_markdown +
+            "\n\n**Answer:**\n" +
+            item.answers[0].body_markdown).unescapeHtml().parseAsCode()
 //    Truncate response if too long
-      if (description.length > 2048) {
-        description = description.substring(0, 2045) + "..."
-        if (hasUnmatchedBackticks(description)) description = description.substring(0, 2042) + "```..."
+        if (description.length > 2048) {
+          description = description.substring(0, 2045) + "..."
+          if (hasUnmatchedBackticks(description)) description = description.substring(0, 2042) + "```..."
+        }
+        embed {
+          this.description = description
+          title = item.title.unescapeHtml()
+          url = item.link
+          color = Colors.GREEN
+          footer("Answer $index/${response.items.size - 1}")
+        }
       }
-      val result = embed {
-        this.description = description
-        title = item.title.unescapeHtml()
-        url = item.link
-        color = Colors.GREEN
-      }
+      query.cache = embeds
       query.increment()
-      query.cache.add(result)
-      return result
+      return embeds[0]
     }
   }
 }
@@ -105,12 +109,27 @@ fun hasUnmatchedBackticks(text: String) = text.split("```").size % 2 == 0
 data class StackAnswers(val body_markdown: String)
 data class StackData(val answers: List<StackAnswers>, val body_markdown: String, val title: String, val link: String)
 data class StackResponse(val items: List<StackData>)
-data class Query(val query: String, val site: String) {
-  var answerNumber = 0
-    private set
-  val cache = mutableListOf<Embed>()
 
-  fun increment() {
+data class Query(val query: String, val site: String) {
+  var answerNumber = -1
+    private set
+
+  lateinit var cache: List<Embed>
+  fun increment(): Boolean {
     answerNumber++
+    if (answerNumber >= cache.size) {
+      answerNumber--
+      return false
+    }
+    return true
+  }
+
+  fun decrement(): Boolean {
+    answerNumber--
+    if (answerNumber < 0) {
+      answerNumber++
+      return false
+    }
+    return true
   }
 }
