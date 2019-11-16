@@ -4,6 +4,7 @@ import com.jessecorbett.diskord.api.rest.Embed
 import com.jessecorbett.diskord.dsl.embed
 import com.jessecorbett.diskord.dsl.footer
 import com.jessecorbett.diskord.util.Colors
+import kotlinx.serialization.Serializable
 
 class StackOverflow {
   companion object StackOverflow {
@@ -68,6 +69,7 @@ data class StackAnswers(val body_markdown: String)
 data class StackData(val answers: List<StackAnswers>, val body_markdown: String, val title: String, val link: String)
 data class StackResponse(val items: List<StackData>)
 
+@Serializable
 data class Query(val query: String, val site: String) {
   var answerNumber = -1
     private set

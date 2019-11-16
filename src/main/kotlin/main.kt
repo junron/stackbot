@@ -30,17 +30,18 @@ Search the StackExchange site corresponding to `[subject name]`
 
 suspend fun main() {
   val token = File("secrets/token.txt").readText().trim()
-  val messages = mutableMapOf<Long, Query>()
+  mutableMapOf<Long, Query>()
   val channels = loadChannels()
   bot(token) {
     reactionAdded {
       //      Return if message is not sent by bot
-      val query = messages[it.messageId.toLong()] ?: return@reactionAdded
+      val query = Database[it.messageId] ?: return@reactionAdded
       val message = clientStore.channels[it.channelId].getMessage(it.messageId)
       val reaction = message.reactions.firstOrNull { reaction -> reaction.emoji == it.emoji } ?: return@reactionAdded
       if (reaction.count == 1) return@reactionAdded
       when (reaction.emoji.stringified) {
         EmojiMappings.trash -> {
+          Database -= it.messageId
           message.delete()
         }
         EmojiMappings.arrowRight -> {
@@ -51,6 +52,7 @@ suspend fun main() {
                 embed = query.cache[query.answerNumber]
               )
             )
+            Database[it.messageId] = query
           }
         }
         EmojiMappings.arrowLeft -> {
@@ -61,6 +63,7 @@ suspend fun main() {
                 embed = query.cache[query.answerNumber]
               )
             )
+            Database[it.messageId] = query
           }
         }
       }
@@ -87,7 +90,7 @@ suspend fun main() {
           val query = Query(queryString, site)
           val message = reply("", StackOverflow.discordSearch(query))
           if (query.answerNumber == -1) return@command
-          messages[message.id.toLong()] = query
+          Database[message.id] = query
           message.react(EmojiMappings.arrowLeft)
           message.react(EmojiMappings.trash)
           message.react(EmojiMappings.arrowRight)
