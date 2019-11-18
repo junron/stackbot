@@ -1,3 +1,4 @@
+import com.jessecorbett.diskord.api.exception.DiscordBadPermissionsException
 import com.jessecorbett.diskord.api.model.stringified
 import com.jessecorbett.diskord.api.rest.MessageEdit
 import com.jessecorbett.diskord.dsl.bot
@@ -43,6 +44,7 @@ suspend fun main() {
         EmojiMappings.trash -> {
           Database -= it.messageId
           message.delete()
+          return@reactionAdded
         }
         EmojiMappings.arrowRight -> {
           if (query.increment()) {
@@ -66,8 +68,13 @@ suspend fun main() {
             Database[it.messageId] = query
           }
         }
+        else -> return@reactionAdded
       }
-
+      try {
+        clientStore.channels[it.channelId].removeMessageReaction(it.messageId, reaction.emoji.stringified, it.userId)
+      } catch (e: DiscordBadPermissionsException) {
+        println("Bad permissions for channel: ${it.channelId}")
+      }
     }
     commands("$") {
       command("help") {
