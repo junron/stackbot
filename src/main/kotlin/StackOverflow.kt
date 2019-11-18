@@ -70,7 +70,7 @@ data class StackData(val answers: List<StackAnswers>, val body_markdown: String,
 data class StackResponse(val items: List<StackData>)
 
 @Serializable
-data class Query(val query: String, val site: String) {
+data class Query(val query: String, val site: String, val userId: String) {
   var answerNumber = -1
     private set
 

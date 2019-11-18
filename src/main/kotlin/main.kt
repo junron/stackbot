@@ -4,6 +4,7 @@ import com.jessecorbett.diskord.api.rest.MessageEdit
 import com.jessecorbett.diskord.dsl.bot
 import com.jessecorbett.diskord.dsl.command
 import com.jessecorbett.diskord.dsl.commands
+import com.jessecorbett.diskord.util.authorId
 import com.jessecorbett.diskord.util.words
 import java.io.File
 
@@ -42,6 +43,8 @@ suspend fun main() {
       if (reaction.count == 1) return@reactionAdded
       when (reaction.emoji.stringified) {
         EmojiMappings.trash -> {
+//          Prevent unauthorized deletion
+          if (query.userId != it.userId) return@reactionAdded
           Database -= it.messageId
           message.delete()
           return@reactionAdded
@@ -94,7 +97,7 @@ suspend fun main() {
           }
           val queryWords = words.drop(1)
           val queryString = queryWords.joinToString(" ")
-          val query = Query(queryString, site)
+          val query = Query(queryString, site, authorId)
           val message = reply("", StackOverflow.discordSearch(query))
           if (query.answerNumber == -1) return@command
           Database[message.id] = query
