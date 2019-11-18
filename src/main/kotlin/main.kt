@@ -5,6 +5,7 @@ import com.jessecorbett.diskord.dsl.bot
 import com.jessecorbett.diskord.dsl.command
 import com.jessecorbett.diskord.dsl.commands
 import com.jessecorbett.diskord.util.authorId
+import com.jessecorbett.diskord.util.sendMessage
 import com.jessecorbett.diskord.util.words
 import java.io.File
 
@@ -36,9 +37,22 @@ suspend fun main() {
   val channels = loadChannels()
   bot(token) {
     reactionAdded {
+      val message = clientStore.channels[it.channelId].getMessage(it.messageId)
+      if (it.emoji.stringified == EmojiMappings.eyes) {
+        val attachment = message.attachments.first()
+//        Return if not image
+        attachment.imageHeight ?: return@reactionAdded
+//         Return if image size > 1MB
+        if (attachment.sizeInBytes > 1e6) return@reactionAdded
+        clientStore.channels[it.channelId].sendMessage(
+          OCR.detect(
+            downloadFile(attachment.url) ?: return@reactionAdded
+          )
+        )
+        return@reactionAdded
+      }
       //      Return if message is not sent by bot
       val query = Database[it.messageId] ?: return@reactionAdded
-      val message = clientStore.channels[it.channelId].getMessage(it.messageId)
       val reaction = message.reactions.firstOrNull { reaction -> reaction.emoji == it.emoji } ?: return@reactionAdded
       if (reaction.count == 1) return@reactionAdded
       when (reaction.emoji.stringified) {
