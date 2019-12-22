@@ -33,7 +33,6 @@ Search the StackExchange site corresponding to `[subject name]`
 
 suspend fun main() {
   val token = File("secrets/token.txt").readText().trim()
-  mutableMapOf<Long, Query>()
   val channels = loadChannels()
   bot(token) {
     reactionAdded {
