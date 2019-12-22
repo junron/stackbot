@@ -16,7 +16,7 @@ class StackOverflow {
           "sort" to "relevance",
           "order" to "desc",
           "site" to site,
-//        Only include answers
+          //  Only include answers
           "filter" to "!*1SgQGDMkNpCIzzMCq25IRX4u0u-1D8S2YxUITK_Q",
           "answers" to 1,
           "pagesize" to 5
@@ -45,7 +45,7 @@ class StackOverflow {
         var description = (item.body_markdown +
             "\n\n**Answer:**\n" +
             item.answers[0].body_markdown).unescapeHtml().parseAsCode()
-//    Truncate response if too long
+        //    Truncate response if too long
         if (description.length > 2048) {
           description = description.substring(0, 2045) + "..."
           if (description.hasUnmatchedBackticks()) description = description.substring(0, 2042) + "```..."
